@@ -47,10 +47,10 @@ export interface ProductMockupConfig {
     width: number;
     height: number;
   };
-  /** Mask image shown during editing (e.g., for arrow sign shape) */
-  editingMaskUrl?: string;
-  /** Mask image used during export (e.g., for transparent areas) */
-  exportingMaskUrl?: string;
+  /**
+   * Optional SVG path. When set, the page is clipped to this shape.
+   */
+  pageShape?: string;
 }
 
 export interface ProductColor {
@@ -323,8 +323,11 @@ export const PRODUCT_SAMPLES: ProductConfig[] = [
             width: ARROWSIGN.printWidth,
             height: ARROWSIGN.printHeight
           },
-          editingMaskUrl: `${ASSETS_BASE}/arrowsign/editing-mask.png`,
-          exportingMaskUrl: `${ASSETS_BASE}/arrowsign/exporting-mask.png`
+          // Arrow-sign silhouette.
+          // Coordinates span the 947×625 printable area, preserving the
+          // rounded corners of the physical sign.
+          pageShape:
+            'M628 0.97C623 3.97 623 3.97 623 46.97L623 88.97L621 91.97L618 93.97L311 94.97C142 94.97 3 95.97 3 95.97C3 95.97 2 96.97 2 98.97C0 101.97 0 124.97 0 309.97L0 516.97L3 519.97L6 522.97L312 522.97L618 522.97L620 525.97L623 528.97L623 570.97L623 611.97L625 614.97C627 616.97 629 616.97 631 616.97C635 616.97 640 611.97 788 464.97C939 312.97 940 311.97 940 308.97C940 304.97 939 303.97 788 151.97C652 16.97 635 -0.03 632 -0.03C631 -0.03 629 0.97 628 0.97Z'
         }
       }
     ],

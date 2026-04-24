@@ -28,42 +28,14 @@ import {
 
 // Configuration
 import { ProductEditorConfig } from './config/plugin';
+import { ProductBackdrop } from './plugins/product-backdrop';
 
 // Exports for external use
 export { ProductEditorConfig } from './config/plugin';
+export { ProductBackdrop } from './plugins/product-backdrop';
 
 // Export types
-export type {
-  AreaConfig,
-  BackdropConfig,
-  MaskConfig,
-  ProductMetadata,
-  DesignUnit,
-  Source
-} from './types';
-
-// Export constants
-export {
-  BACKDROP_BLOCK_KIND,
-  MASK_BLOCK_KIND,
-  METADATA_KEYS,
-  ZOOM_PADDING
-} from './constants';
-
-// Export backdrop functions
-export {
-  createBackdrop,
-  updateBackdropImages,
-  showBackdrop,
-  clearBackdrops,
-  getPageBackdropConfig
-} from './backdrop';
-
-// Export mask functions
-export { setMaskConfig, updateMasks, clearMasks } from './mask';
-
-// Export page and scene functions
-export { createOrUpdateScene, getVisibleAreaId, switchArea } from './page';
+export type { ProductMetadata, DesignUnit, Source } from './types';
 
 /**
  * Initialize the CE.SDK Editor with plugins and UI configuration.
@@ -80,6 +52,7 @@ export async function initProductEditor(cesdk: CreativeEditorSDK) {
   // ============================================================================
 
   await cesdk.addPlugin(new ProductEditorConfig());
+  await cesdk.addPlugin(new ProductBackdrop());
 
   // ============================================================================
   // Asset Source Plugins
