@@ -1,25 +1,27 @@
 /**
  * CE.SDK Product Editor - Main App Component
  *
- * This component orchestrates all product-related logic. The imgly folder
- * contains agnostic editor functions - all product-specific operations
- * are handled here by mapping product data to generic scene functions.
- *
- * The CreativeEditor component is passed as children from index.tsx,
- * while cesdk instance is provided via prop for product operations.
+ * Orchestrates product-specific React state (current product, selected color)
+ * and drives the editor scene through the `product.*` actions registered by
+ * the ProductBackdrop plugin.
  */
 
 import { useEffect, useState, type ReactNode } from 'react';
 import type CreativeEditorSDK from '@cesdk/cesdk-js';
 
-import { initProductEditor, switchArea, getVisibleAreaId } from '../imgly';
+import { initProductEditor } from '../imgly';
 
 import {
   PRODUCT_SAMPLES,
   ProductConfig,
   ProductColor
 } from './product-catalog';
-import { setupProductScene, updateProductColor } from './utils/product';
+import {
+  setupSceneOptions,
+  storeProductMetadata,
+  readProductFromMetadata,
+  downloadProductAssets
+} from './utils/product';
 import { Sidebar } from './Sidebar/Sidebar';
 import styles from './App.module.css';
 
@@ -49,21 +51,21 @@ export default function App({ cesdk, children }: AppProps) {
     if (!cesdk || isInitialized) return;
 
     const initializeProduct = async () => {
-      // Initialize editor (plugins, UI, actions)
       await initProductEditor(cesdk);
 
-      // Set up default product scene
       const defaultProduct = PRODUCT_SAMPLES[0];
       const defaultColor =
         defaultProduct.colors.find((color) => color.isDefault) ||
         defaultProduct.colors[0];
 
-      await setupProductScene(cesdk, defaultProduct, defaultColor);
+      await cesdk.actions.run(
+        'product.setupScene',
+        setupSceneOptions(defaultProduct, defaultColor)
+      );
+      storeProductMetadata(cesdk, defaultProduct, defaultColor);
 
-      // Switch to first area
-      await switchArea(cesdk, defaultProduct.areas[0].id);
+      await cesdk.actions.run('product.switchArea', defaultProduct.areas[0].id);
 
-      // Update React state
       setProductId(defaultProduct.id);
       setColor(defaultColor);
       setIsInitialized(true);
@@ -85,44 +87,53 @@ export default function App({ cesdk, children }: AppProps) {
     setProductId(product.id);
     setColor(newColor);
 
-    // Set up new product scene
-    await setupProductScene(cesdk, product, newColor);
+    await cesdk.actions.run(
+      'product.setupScene',
+      setupSceneOptions(product, newColor)
+    );
+    storeProductMetadata(cesdk, product, newColor);
 
-    // Switch to first area
-    await switchArea(cesdk, product.areas[0].id);
+    await cesdk.actions.run('product.switchArea', product.areas[0].id);
   };
 
   const handleColorChange = async (newColor: ProductColor) => {
     if (!cesdk) return;
 
-    // Get current product from state or metadata
-    let product = PRODUCT_SAMPLES.find((sample) => sample.id === productId);
-    if (!product) {
-      const scene = cesdk.engine.scene.get();
-      if (scene != null) {
-        const productData = cesdk.engine.block.getMetadata(scene, 'product');
-        if (productData) {
-          product = JSON.parse(productData) as ProductConfig;
-        }
-      }
-    }
+    const product =
+      PRODUCT_SAMPLES.find((sample) => sample.id === productId) ??
+      readProductFromMetadata(cesdk);
     if (!product) return;
 
     setColor(newColor);
 
-    // Update backdrops with new color
-    updateProductColor(cesdk, product, newColor);
+    const enabledAreas = product.areas
+      .filter((area) => !area.disabled)
+      .map((area) => ({ id: area.id, mockup: area.mockup }));
+    await cesdk.actions.run(
+      'product.applyVariables',
+      { color: newColor.id },
+      enabledAreas
+    );
 
-    // Refresh view
-    const areaId = getVisibleAreaId(cesdk.engine) || product.areas[0].id;
-    await switchArea(cesdk, areaId);
+    const scene = cesdk.engine.scene.get();
+    if (scene != null) {
+      cesdk.engine.block.setMetadata(scene, 'color', JSON.stringify(newColor));
+    }
+
+    const visibleAreaId = (await cesdk.actions.run(
+      'product.getVisibleAreaId'
+    )) as string | null;
+    await cesdk.actions.run(
+      'product.switchArea',
+      visibleAreaId ?? product.areas[0].id
+    );
   };
 
   const handleExportRequest = async () => {
     if (!cesdk) return;
-    // Use the downloadDesignData action which handles
-    // exporting and downloading all product areas as PDFs and thumbnails
-    await cesdk.actions.run('downloadDesignData');
+    // Export every area to PDF + thumbnail, bundle with the scene archive
+    // into a single .zip, and trigger a browser download.
+    await downloadProductAssets(cesdk);
   };
 
   // ============================================================================

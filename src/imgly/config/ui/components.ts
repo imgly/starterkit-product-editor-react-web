@@ -24,7 +24,6 @@
 
 import type CreativeEditorSDK from '@cesdk/cesdk-js';
 
-import { switchArea } from '../../page';
 import type { ProductMetadata } from '../../types';
 
 /**
@@ -48,11 +47,11 @@ export function setupComponents(cesdk: CreativeEditorSDK): void {
     // Get product from metadata (stored by App.tsx during scene setup)
     const scene = engine.scene.get();
     if (scene == null) return;
+    if (!engine.block.hasMetadata(scene, 'product')) return;
 
-    const productData = engine.block.getMetadata(scene, 'product');
-    if (!productData) return;
-
-    const product = JSON.parse(productData) as ProductMetadata;
+    const product = JSON.parse(
+      engine.block.getMetadata(scene, 'product')
+    ) as ProductMetadata;
 
     // Only render for products with multiple areas
     if (product.areas.length <= 1) {
@@ -75,10 +74,15 @@ export function setupComponents(cesdk: CreativeEditorSDK): void {
               isActive: currentAreaId === area.id,
               onClick: () => {
                 // Switch to the selected area
-                switchArea(cesdk, area.id).catch((err) => {
-                  // eslint-disable-next-line no-console
-                  console.error('[area-select] switchArea error:', err);
-                });
+                cesdk.actions
+                  .run('product.switchArea', area.id)
+                  .catch((err) => {
+                    // eslint-disable-next-line no-console
+                    console.error(
+                      '[area-select] product.switchArea error:',
+                      err
+                    );
+                  });
               }
             });
           });
