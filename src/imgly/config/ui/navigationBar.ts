@@ -71,15 +71,7 @@ export function setupNavigationBar(cesdk: CreativeEditorSDK): void {
     // ============================
     // Right Section - Actions
     // ============================
-    'ly.img.zoom.navigationBar',
-
-    // ============================
-    // Actions Dropdown
-    // ============================
-    {
-      id: 'ly.img.actions.navigationBar',
-      children: ['ly.img.exportImage.navigationBar']
-    }
+    'ly.img.zoom.navigationBar'
   ]);
   // #endregion
 }
