@@ -8,7 +8,7 @@
  * Product orchestration belongs in App.tsx.
  */
 
-import CreativeEditorSDK from '@cesdk/cesdk-js';
+import type CreativeEditorSDK from '@cesdk/cesdk-js';
 
 import {
   BlurAssetSource,
