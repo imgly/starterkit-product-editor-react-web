@@ -1,7 +1,7 @@
 {
   "name": "starterkit-product-editor",
   "version": "1.0.0",
-  "description": "CE.SDK Starterkit",
+  "description": "Product mockup editor for designing on physical products like t-shirts, mugs, and phone cases.",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
@@ -9,12 +9,15 @@
     "check:syntax": "tsc --noEmit"
   },
   "dependencies": {
-    "@cesdk/cesdk-js": "latest",
+    "@cesdk/cesdk-js": "^1.75.0",
     "classnames": "^2.5.1",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "@cesdk/engine": "^1.75.0"
   },
   "devDependencies": {
+    "@types/classnames": "^2.3.0",
+    "@types/node": "^25.3.0",
     "@types/react": "^18.2.15",
     "@types/react-dom": "^18.2.7",
     "@vitejs/plugin-react": "^4.5.2",
