@@ -35,11 +35,12 @@ export function Sidebar({
   const handleProductSelect = (selectedProduct: ProductConfig) => {
     if (selectedProduct.id === productId) return;
 
-    const defaultColor =
-      selectedProduct.colors.find((color) => color.isDefault) ||
+    const nextColor =
+      selectedProduct.colors.find((option) => option.id === color.id) ||
+      selectedProduct.colors.find((option) => option.isDefault) ||
       selectedProduct.colors[0];
 
-    onProductChange(selectedProduct, defaultColor);
+    onProductChange(selectedProduct, nextColor);
   };
 
   return (
