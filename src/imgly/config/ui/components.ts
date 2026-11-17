@@ -61,7 +61,7 @@ export function setupComponents(cesdk: CreativeEditorSDK): void {
     // Determine current area from page name
     const currentAreaId = currentPage
       ? engine.block.getName(currentPage)
-      : product.areas[0].id;
+      : product.areas[0]!.id;
 
     // Build the button group with Front/Back buttons
     builder.ButtonGroup('product-areas', {
